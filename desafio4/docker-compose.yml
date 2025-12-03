@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  service-a:
+    build:
+      context: ./service-a
+      dockerfile: Dockerfile
+    container_name: desafio4-service-a
+    environment:
+      - SERVICE_NAME=Service-A (Users API)
+      - SERVICE_PORT=5001
+    ports:
+      - "5001:5001"
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  service-b:
+    build:
+      context: ./service-b
+      dockerfile: Dockerfile
+    container_name: desafio4-service-b
+    environment:
+      - SERVICE_NAME=Service-B (User Info Aggregator)
+      - SERVICE_PORT=5002
+      - SERVICE_A_URL=http://service-a:5001
+    ports:
+      - "5002:5002"
+    networks:
+      - microservices-network
+    depends_on:
+      service-a:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  microservices-network:
+    name: desafio4-network
+    driver: bridge
+
+
