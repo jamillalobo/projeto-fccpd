@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: desafio5-gateway
+    environment:
+      - SERVICE_NAME=API Gateway
+      - SERVICE_PORT=8000
+      - USERS_SERVICE_URL=http://users-service:5001
+      - ORDERS_SERVICE_URL=http://orders-service:5002
+    ports:
+      - "8000:8000"
+    networks:
+      - gateway-network
+    depends_on:
+      users-service:
+        condition: service_healthy
+      orders-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  users-service:
+    build:
+      context: ./users-service
+      dockerfile: Dockerfile
+    container_name: desafio5-users-service
+    environment:
+      - SERVICE_NAME=Users Service
+      - SERVICE_PORT=5001
+    networks:
+      - gateway-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  orders-service:
+    build:
+      context: ./orders-service
+      dockerfile: Dockerfile
+    container_name: desafio5-orders-service
+    environment:
+      - SERVICE_NAME=Orders Service
+      - SERVICE_PORT=5002
+      - USERS_SERVICE_URL=http://users-service:5001
+    networks:
+      - gateway-network
+    depends_on:
+      users-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  gateway-network:
+    name: desafio5-network
+    driver: bridge
+
