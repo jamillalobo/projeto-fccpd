@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio 1 - Docker Network</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Desafio 1</h1>
+        <div class="info">
+            <h2>✅ Servidor Web Ativo!</h2>
+            <p><strong>Servidor:</strong> Nginx (Alpine Linux)</p>
+            <p><strong>Porta:</strong> 8080 (externa) → 80 (interna)</p>
+            <p><strong>Rede:</strong> desafio1-network</p>
+        </div>
+        <div class="info">
+            <h2>Comunicação entre Containers</h2>
+            <p>Servidor recebendo requisições periódicas do container <code>http-client</code>.</p>
+        </div>
+        <div class="info">
+            <h2>🕒 Timestamp</h2>
+            <p id="timestamp"></p>
+        </div>
+    </div>
+    <script>
+        function updateTimestamp() {
+            document.getElementById('timestamp').textContent = new Date().toLocaleString('pt-BR');
+        }
+        updateTimestamp();
+        setInterval(updateTimestamp, 1000);
+    </script>
+</body>
+</html>
+
