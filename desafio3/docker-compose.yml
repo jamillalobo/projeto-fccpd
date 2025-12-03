@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: desafio3-web
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      - DATABASE_URL=postgresql://postgres:postgres123@db:5432/app_db
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - API_SECRET_KEY=chave_secreta_super_segura_123
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - ./web:/app
+    command: python app.py
+
+  db:
+    image: postgres:15-alpine
+    container_name: desafio3-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+      - POSTGRES_DB=app_db
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  cache:
+    image: redis:7-alpine
+    container_name: desafio3-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    volumes:
+      - cache-data:/data
+    command: redis-server --appendonly yes --appendfsync everysec
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  app-network:
+    name: desafio3-network
+    driver: bridge
+
+volumes:
+  db-data:
+    name: desafio3-db-data
+  cache-data:
+    name: desafio3-cache-data
+
